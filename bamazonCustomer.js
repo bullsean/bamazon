@@ -17,7 +17,6 @@ connection.connect(function (err) {
 });
 
 function currentInventory() {
-    console.log('This is where your table will go...')
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
 
@@ -57,16 +56,32 @@ function purchase() {
                     // console.log(results[0].stock_quantity)
                     // console.log(parseInt(answer.quantity))
                     var answerQuant = parseInt(answer.quantity)
-                    if (answerQuant < results[0].stock_quantity) {
+                    if (answerQuant <= results[0].stock_quantity) {
                         console.log('Great! Now, I will do some calculations.')
                         //update quantity in database
-                        
+                        connection.query(
+                            "UPDATE products SET ? WHERE ?",
+                            [
+                                {
+                                    stock_quantity: (results[0].stock_quantity - answerQuant)
+                                },
+                                {
+                                    item_id: answer.productPurchaseId
+                                }
+                            ],
+                            function (err, res) {
+                                if (err) throw err;
+                                console.log('Updated quantity');
+                                purchase();
+                            }
+                        );
                         //do calculation to determine how much money it will cost.
                         console.log('You\'re total will be: $' + (answerQuant * results[0].price))
 
-                    // if the quantity entered is more than the quantity in database return the message
+                        // if the quantity entered is more than the quantity in database return the message
                     } else {
                         console.log('Oops, it looks like we don\'t have enough. We apologize for the inconvenience.');
+                        purchase();
                     }
                 }
             )
