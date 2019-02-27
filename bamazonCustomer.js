@@ -29,6 +29,10 @@ function currentInventory() {
 
 }
 
+var answerQuant = '';
+var remainingStock = 0;
+var productId = '';
+
 function purchase() {
     inquirer
         .prompt([
@@ -55,37 +59,44 @@ function purchase() {
                     if (err) throw err;
                     // console.log(results[0].stock_quantity)
                     // console.log(parseInt(answer.quantity))
-                    var answerQuant = parseInt(answer.quantity)
+                    answerQuant = parseInt(answer.quantity);
+                    remainingStock = results[0].stock_quantity - answerQuant;
+                    productId = answer.productPurchaseId;
+
                     if (answerQuant <= results[0].stock_quantity) {
-                        console.log('Great! Now, I will do some calculations.')
+                        console.log('Great! We are happy for your purchase. Fetching your total...')
                         //update quantity in database
-                        connection.query(
-                            "UPDATE products SET ? WHERE ?",
-                            [
-                                {
-                                    stock_quantity: (results[0].stock_quantity - answerQuant)
-                                },
-                                {
-                                    item_id: answer.productPurchaseId
-                                }
-                            ],
-                            function (err, res) {
-                                if (err) throw err;
-                                console.log('Updated quantity');
-                                purchase();
-                            }
-                        );
+                        stockUpdate();
                         //do calculation to determine how much money it will cost.
                         console.log('You\'re total will be: $' + (answerQuant * results[0].price))
 
                         // if the quantity entered is more than the quantity in database return the message
                     } else {
-                        console.log('Oops, it looks like we don\'t have enough. We apologize for the inconvenience.');
+                        console.log('Oops, it looks like we don\'t have enough. We apologize for the inconvenience.\n\n\n');
                         purchase();
                     }
                 }
             )
         });
+}
+
+function stockUpdate() {
+    connection.query(
+        "UPDATE products SET ? WHERE ?",
+        [
+            {
+                stock_quantity: (remainingStock)
+            },
+            {
+                item_id: productId
+            }
+        ],
+        function (err, res) {
+            if (err) throw err;
+            console.log('Updated quantity');
+            purchase();
+        }
+    );
 }
 
 // 5. Then create a Node application called `bamazonCustomer.js`. Running this application will first display all of the items available for sale. Include the ids, names, and prices of products for sale.
