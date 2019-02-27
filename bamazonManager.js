@@ -95,7 +95,7 @@ function addInventory() {
             {
                 name: "productAddId",
                 type: "input",
-                message: "Which product would you like to order inventory? (Please enter an ID)"
+                message: "Which product would you like to order inventory? (Please enter an ID)\n"
             },
             {
                 name: "quantity",
