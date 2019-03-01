@@ -100,7 +100,7 @@ function addInventory() {
             {
                 name: "quantity",
                 type: "input",
-                message: "How many units would you like to restock?"
+                message: "How many units would you like to restock?\n"
             },
         ])
         .then(function (answer) {
